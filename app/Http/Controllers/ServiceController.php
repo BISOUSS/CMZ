@@ -14,7 +14,6 @@ class ServiceController extends Controller
     {
         // Récupérer tous les services
         $services = Service::all();
-
         // Passer les services à la vue
         return view('dash.service', compact('services'));
     }
