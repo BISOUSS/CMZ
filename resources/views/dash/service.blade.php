@@ -1,205 +1,122 @@
-<!DOCTYPE html>
-<html>
+@include('dash.layout.header')
+@include('dash.layout.CSS')
 
-<head>
-  <title>Service Management</title>
-  <link rel="stylesheet" href="{{ asset('dash/css/styles.min.css') }}">
-  <link rel="stylesheet" href="{{ asset('dash/libs/bootstrap/dist/css/bootstrap.min.css') }}">
-  <style>
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    .table-container {
-      width: 90%;
-      max-width: 1200px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      border-radius: 8px;
-      margin: 0 auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    th,
-    td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    th {
-      background-color: #f8f8f8;
-      color: #333;
-      text-transform: uppercase;
-      font-weight: bold;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-
-    .actions button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      cursor: pointer;
-      border-radius: 4px;
-      margin-right: 5px;
-      transition: background-color 0.3s;
-    }
-
-    .actions button:hover {
-      background-color: #0056b3;
-    }
-
-    button.add-service {
-      display: block;
-      width: 200px;
-      margin: 20px auto;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-    }
-  </style>
-</head>
-
-<body>
+<<div class="container-fluid">
   <div class="container">
-    <h1>Liste des Services</h1>
-    <div class="table-container">
-      <table id="serviceTable">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Description</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach($services as $service)
-          <tr>
-            <td>{{ $service->id }}</td>
-            <td>{{ $service->name }}</td>
-            <td>{{ $service->description }}</td>
-            <td class="actions">
-              <button class="edit-button" data-id="{{ $service->id }}" data-name="{{ $service->name }}" data-description="{{ $service->description }}">Modifier</button>
-              <form action="{{ route('service.destroy', $service->id) }}" method="POST" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button type="submit">Supprimer</button>
-              </form>
-            </td>
-          </tr>
-          @endforeach
-        </tbody>
-      </table>
-    </div>
-    <button class="add-service" onclick="showAddServiceModal()">Ajouter Service</button>
-
-    <!-- Add Service Modal -->
-    <div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addServiceModalLabel">Ajouter Service</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form action="{{ route('service.store') }}" method="POST">
-              @csrf
-              <div class="mb-3">
-                <label for="name" class="form-label">Nom:</label>
-                <input type="text" name="name" class="form-control" required>
-              </div>
-              <div class="mb-3">
-                <label for="description" class="form-label">Description:</label>
-                <textarea name="description" class="form-control" required></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">Ajouter</button>
-            </form>
-          </div>
-        </div>
+    <div class="row mb-3">
+      <div class="col-md-9">
+        <h1>Liste des Services</h1>
+      </div>
+      <div class="col-md-3 text-right">
+        <!-- Bouton global pour ajouter un service -->
+        <button class="btn btn-primary" onclick="showAddServiceModal()">Ajouter un Service</button>
       </div>
     </div>
-
-    <!-- Edit Service Modal -->
-    <div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editServiceModalLabel">Modifier Service</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="editServiceForm" method="POST">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="servicesTable">
+        @foreach($services as $service)
+        <tr id="service-{{ $service->id }}">
+          <td>{{ $service->name }}</td>
+          <td>{{ $service->description }}</td>
+          <td class="actions">
+            <button class="btn btn-warning edit-button" data-id="{{ $service->id }}" data-name="{{ $service->name }}" data-description="{{ $service->description }}">Modifier</button>
+            <form action="{{ route('service.destroy', $service->id) }}" method="POST" style="display:inline;">
               @csrf
-              @method('PUT')
-              <div class="mb-3">
-                <label for="editName" class="form-label">Nom:</label>
-                <input type="text" name="name" id="editName" class="form-control" required>
-              </div>
-              <div class="mb-3">
-                <label for="editDescription" class="form-label">Description:</label>
-                <textarea name="description" id="editDescription" class="form-control" required></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">Modifier</button>
+              @method('DELETE')
+              <button type="submit" class="btn btn-danger">Supprimer</button>
             </form>
-          </div>
+          </td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- Modal pour l'ajout de service -->
+  <div class="modal fade" id="addServiceModal" tabindex="-1" role="dialog" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addServiceModalLabel">Ajouter un Service</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="addServiceForm" action="{{ route('service.store') }}" method="POST">
+            @csrf
+            <div class="form-group">
+              <label for="name">Nom du service</label>
+              <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea class="form-control" id="description" name="description" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+          </form>
         </div>
       </div>
     </div>
   </div>
-
-  <script src="{{ asset('dash/libs/jquery/dist/jquery.min.js') }}"></script>
-  <script src="{{ asset('dash/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ asset('dash/js/sidebarmenu.js') }}"></script>
-  <script src="{{ asset('dash/js/app.min.js') }}"></script>
-  <script src="{{ asset('dash/libs/simplebar/dist/simplebar.js') }}"></script>
   <script>
     function showAddServiceModal() {
-      var myModal = new bootstrap.Modal(document.getElementById('addServiceModal'), {
-        keyboard: false
-      });
-      myModal.show();
+      $('#addServiceModal').modal('show');
     }
 
-    document.querySelectorAll('.edit-button').forEach(button => {
-      button.addEventListener('click', () => {
-        const id = button.getAttribute('data-id');
-        const name = button.getAttribute('data-name');
-        const description = button.getAttribute('data-description');
-
-        document.getElementById('editName').value = name;
-        document.getElementById('editDescription').value = description;
-        document.getElementById('editServiceForm').action = `/services/${id}`;
-
-        var myModal = new bootstrap.Modal(document.getElementById('editServiceModal'), {
-          keyboard: false
-        });
-        myModal.show();
+    $('#addServiceForm').on('submit', function(e) {
+      e.preventDefault();
+      var form = $(this);
+      $.ajax({
+        url: form.attr('action'),
+        method: form.attr('method'),
+        data: form.serialize(),
+        success: function(response) {
+          var newRow = `
+          <tr id="service-${response.id}">
+            <td>${response.name}</td>
+            <td>${response.description}</td>
+            <td class="actions">
+              <button class="btn btn-warning edit-button" data-id="${response.id}" data-name="${response.name}" data-description="${response.description}">Modifier</button>
+              <form action="/service/${response.id}" method="POST" style="display:inline;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">Supprimer</button>
+              </form>
+            </td>
+          </tr>`;
+          $('#servicesTable').append(newRow);
+          $('#addServiceModal').modal('hide');
+          form[0].reset();
+        },
+        error: function(response) {
+          // Handle errors here
+          console.log(response);
+        }
       });
     });
-  </script>
-</body>
 
-</html>
+    $(document).on('click', '.edit-button', function() {
+      var id = $(this).data('id');
+      var name = $(this).data('name');
+      var description = $(this).data('description');
+
+      // Pré-remplir le formulaire d'édition avec les données existantes
+      $('#editServiceModal input[name="name"]').val(name);
+      $('#editServiceModal textarea[name="description"]').val(description);
+      $('#editServiceForm').attr('action', '/service/' + id); // Ajustez l'URL selon votre route
+
+      $('#editServiceModal').modal('show');
+    });
+  </script>
+
+
+  @include('dash.layout.footer')

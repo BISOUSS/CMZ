@@ -30,13 +30,19 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
+
         $request->validate([
             'name' => 'required',
             'description' => 'required',
         ]);
 
-        Service::create($request->all());
-        return redirect()->route('dash.service');
+        $service = Service::create($request->all());
+
+        if ($request->ajax()) {
+            return response()->json($service);
+        }
+
+        return redirect()->route('service.index')->with('success', 'Service ajouté avec succès.');
     }
 
     /**
