@@ -67,6 +67,36 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal pour l'édition de service -->
+  <div class="modal fade" id="editServiceModal" tabindex="-1" role="dialog" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editServiceModalLabel">Modifier le Service</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editServiceForm" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="form-group">
+              <label for="edit-name">Nom du service</label>
+              <input type="text" class="form-control" id="edit-name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-description">Description</label>
+              <textarea class="form-control" id="edit-description" name="description" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     function showAddServiceModal() {
       $('#addServiceModal').modal('show');
@@ -115,6 +145,35 @@
       $('#editServiceForm').attr('action', '/service/' + id); // Ajustez l'URL selon votre route
 
       $('#editServiceModal').modal('show');
+    });
+  </script>
+  <script>
+    $('#editServiceForm').on('submit', function(e) {
+      e.preventDefault();
+      var form = $(this);
+      $.ajax({
+        url: form.attr('action'),
+        method: 'POST', // Utiliser POST pour permettre à _method de gérer PUT
+        data: form.serialize(),
+        success: function(response) {
+          var updatedRow = `
+                    <td>${response.name}</td>
+                    <td>${response.description}</td>
+                    <td class="actions">
+                        <button class="btn btn-warning edit-button" data-id="${response.id}" data-name="${response.name}" data-description="${response.description}">Modifier</button>
+                        <form action="/service/${response.id}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                        </form>
+                    </td>`;
+          $('#service-' + response.id).html(updatedRow);
+          $('#editServiceModal').modal('hide');
+        },
+        error: function(response) {
+          console.log(response);
+        }
+      });
     });
   </script>
 

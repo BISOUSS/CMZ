@@ -66,14 +66,21 @@ class ServiceController extends Controller
      */
     public function update(Request $request, Service $service)
     {
+
         $request->validate([
             'name' => 'required',
             'description' => 'required',
         ]);
 
         $service->update($request->all());
-        return redirect()->route('dash.service');
+
+        if ($request->ajax()) {
+            return response()->json($service);
+        }
+
+        return redirect()->route('service.index');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -81,6 +88,6 @@ class ServiceController extends Controller
     public function destroy(Service $service)
     {
         $service->delete();
-        return redirect()->route('dash.service');
+        return redirect()->route('service.index');
     }
 }

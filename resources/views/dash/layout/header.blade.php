@@ -7,6 +7,7 @@
     <title>CMZ</title>
     <link rel="shortcut icon" type="image/png" href="{{asset('dash/images/logos/favicon.png')}}" />
     <link rel="stylesheet" href="{{asset('dash/css/styles.min.css')}}" />
+    
 </head>
 
 <body>
